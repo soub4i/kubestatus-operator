@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubestatus 
+
+---
+apiVersion: crd.soubai.me/v1alpha1
+kind: KubeStatus
+metadata:
+  labels:
+    app.kubernetes.io/name: kubestatus-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: kubestatus-operator
+  namespace: kubestatus
+spec:
+  size: 3
+  namespaces:
+    - default
+  configMapName: kubestatus-configmap

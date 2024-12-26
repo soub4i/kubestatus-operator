@@ -1,0 +1,5 @@
+## Append samples of your project ##
+resources:
+- crd_v1alpha1_kubestatus.yaml
+- crd_v1_kubestatus.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples
