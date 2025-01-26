@@ -4,6 +4,9 @@
 
 ## Description
 
+![](./screenshots/1.png)
+
+
 Kubestatus is an free and open-source tool to easily add status page to your Kubernetes cluster that currently display the status (operational, degraded or DOWN) of services.It is written in Go and uses the Kubernetes API to fetch information about the clusters and resources checck the [kubestatus-operand](https://github.com/soub4i/kubestatus-operand) image.
 
 The tool provides a simple and convenient way to view the current state of your cluster and resources without having to use the kubectl command-line tool or the Kubernetes dashboard and in the same time give you a costumer friendly page that can be used as you main status page.
@@ -177,9 +180,8 @@ In order to visit kubestatus status page you can `port-forword` the Kubestatus s
 kubectl port-forward service/kubestatus-service 8080 -n kubestatus
 ```
 
-🚀 Now navigate to http://localhost:8080 you should see your status page like this:
+🚀 Now navigate to http://localhost:8080 
 
-![](./screenshots/1.png)
 
 
 
