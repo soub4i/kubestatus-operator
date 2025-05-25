@@ -104,15 +104,17 @@ kubectl get kubestatus sample-kubestatus -o yaml
 ### Example Configuration
 
 ```yaml
-apiVersion: crd.soubai.me/v1
+apiVersion: crd.soubai.me/v1alpha1
 kind: KubeStatus
 metadata:
-  name: dub-cluster12-status
+  name: kubestatus-operator
+  namespace: kubestatus
 spec:
-  namespaces: 
+  size: 3
+  namespaces:
     - default
-    - web-namepace
-  Size: 1
+    - my-app-namespace
+  configMapName: kubestatus-configmap
 ```
 
 ### Service annotation

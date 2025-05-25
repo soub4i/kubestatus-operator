@@ -412,7 +412,7 @@ spec:
         - --health-probe-bind-address=:8081
         command:
         - /manager
-        image: soubai/kubestatus-operator:latest
+        image: controller:latest
         livenessProbe:
           httpGet:
             path: /healthz

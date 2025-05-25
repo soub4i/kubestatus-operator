@@ -116,7 +116,7 @@ func (r *KubeStatusReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, err
 	}
 
-	err = r.createRole(ctx)
+	err = r.createRole(ctx, &ks)
 
 	if err != nil {
 
@@ -263,7 +263,7 @@ func (r *KubeStatusReconciler) secretForKS(c context.Context, k *crdv1.KubeStatu
 	return s
 }
 
-func (r *KubeStatusReconciler) createRole(c context.Context) error {
+func (r *KubeStatusReconciler) createRole(c context.Context, k *crdv1.KubeStatus) error {
 	log := log.FromContext(c)
 	// Create Role as unstructured
 	r.Recorder.Event(&crdv1.KubeStatus{}, "Info", "Creating", "Create Role")
@@ -328,40 +328,43 @@ func (r *KubeStatusReconciler) createRole(c context.Context) error {
 
 	}
 
-	rb := &rbacv1.RoleBinding{}
-	err = r.Get(c, types.NamespacedName{Name: "default-to-secrets", Namespace: DEFAULT_NS}, rb)
-	if err != nil && errors.IsNotFound(err) {
-		roleBinding := &unstructured.Unstructured{
-			Object: map[string]interface{}{
-				"apiVersion": "rbac.authorization.k8s.io/v1",
-				"kind":       "RoleBinding",
-				"metadata": map[string]interface{}{
-					"name":      "default-to-secrets",
-					"namespace": DEFAULT_NS,
-				},
-				"subjects": []interface{}{
-					map[string]interface{}{
-						"kind":      "ServiceAccount",
-						"name":      "kubestatus",
-						"namespace": DEFAULT_NS,
+	for _, ns := range append([]string{DEFAULT_NS}, k.Spec.Namespaces...) {
+		rb := &rbacv1.RoleBinding{}
+		err = r.Get(c, types.NamespacedName{Name: "default-to-secrets", Namespace: ns}, rb)
+		if err != nil && errors.IsNotFound(err) {
+			roleBinding := &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "rbac.authorization.k8s.io/v1",
+					"kind":       "RoleBinding",
+					"metadata": map[string]interface{}{
+						"name":      "default-to-secrets",
+						"namespace": ns,
+					},
+					"subjects": []interface{}{
+						map[string]interface{}{
+							"kind":      "ServiceAccount",
+							"name":      "kubestatus",
+							"namespace": ns,
+						},
+					},
+					"roleRef": map[string]interface{}{
+						"kind":     "Role",
+						"name":     "kubestatus",
+						"apiGroup": "rbac.authorization.k8s.io",
 					},
 				},
-				"roleRef": map[string]interface{}{
-					"kind":     "Role",
-					"name":     "kubestatus",
-					"apiGroup": "rbac.authorization.k8s.io",
-				},
-			},
-		}
+			}
 
-		err = r.Client.Create(c, roleBinding, &client.CreateOptions{})
+			err = r.Client.Create(c, roleBinding, &client.CreateOptions{})
 
-		if err != nil {
-			log.Error(err, "Error creating role binding")
-			r.Recorder.Eventf(&crdv1.KubeStatus{}, "Erroe", "Creating", "Error: creating Role")
-			return err
+			if err != nil {
+				log.Error(err, "Error creating role binding")
+				r.Recorder.Eventf(&crdv1.KubeStatus{}, "Erroe", "Creating", "Error: creating Role")
+				return err
+			}
 		}
 	}
+
 	log.Info("RBAC ok")
 	return nil
 }
